@@ -1,0 +1,44 @@
+from sympy import symbols, Eq, solve
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+
+a = 0.47943 #sin(rad(0.5))
+b = 0.87758 #cos(rad(0.5))
+m = 0.10111
+g = 9.8067
+alpha = 0.001084 
+l = 0.0771
+dt = np.dtype([('time', 'f8'),('signal', 'f4')])
+z1 = np.zeros(18,dtype=dt)
+z1['time'] = np.linspace(0., 8.5,18)
+
+for n in range(50):
+    if a > 0:
+        x, y = symbols("x y")
+        equation_1 = Eq((-(1-x**2)**0.5 + y), 0)
+        equation_2 = Eq(alpha*(3-2*b)*x - l*y, -(l*b)-alpha*a*(3-2*b))
+        z1['signal'][n] = math.asin(a)*(-1)**(n)
+        solution = solve((equation_1, equation_2), (x, y))
+        print("sinθ for {:.1f}T:".format((n+1)/2), solution[1][0])
+        if abs(a) < abs(solution[1][0]):
+            break
+        a = solution[1][0]  #sinθn 재정의
+        b = solution[1][1]  #cosθn 재정의
+    else:
+        break
+print("\n",z1)
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.plot(z1['time'],z1['signal'],'o',color='r')
+plt.xlabel('T')
+plt.ylabel('sinθ')
+
+ax.plot(z1['time'],z1['signal'],'o',color='r',label = 'open circuit')
+plt.legend()
+plt.show()
+
+if abs(a) < abs(solution[1][0]):
+    print("\n진자는",n/2,"주기 진동 후에 멈춘다")
+else:
+    print("\n진자는",(n-1)/2,"주기 진동 후에 멈춘다")
